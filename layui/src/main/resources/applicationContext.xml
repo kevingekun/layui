@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
+"http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+	<!-- dbcp连接池配置 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.connection.driver_class}" />
+		<property name="url" value="${jdbc.connection.url}" />
+		<property name="username" value="${jdbc.connection.username}" />
+		<property name="password" value="${jdbc.connection.password}" />
+		<property name="initialSize" value="${jdbc.connection.initialSize}" />
+		<property name="maxActive" value="${jdbc.connection.maxActive}" />
+		<property name="maxIdle" value="${jdbc.connection.maxIdle}" />
+		<property name="maxWait" value="${jdbc.connection.maxWait}" />
+		<property name="removeAbandoned" value="${jdbc.connection.removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${jdbc.connection.removeAbandonedTimeout}" />
+		<property name="logAbandoned" value="${jdbc.connection.logAbandoned}" />
+	</bean>
+
+	<!-- jndi连接池配置 -->
+	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+		<description>JNDI 数据源配置</description> <property name="jndiName" value="JDZX"/> 
+		</bean> -->
+	<!-- spring 声明式事务配置 -->
+	<bean id="commonJdbcCore" class="com.wb.jdbcutils.CommonJdbcCore">
+		<property name="devMode" value="${application.jdbc.devMode}" />
+		<property name="showSql" value="${application.jdbc.showSql}" />
+		<property name="maxsqltime" value="${application.jdbc.maxsqltime}" />
+		<property name="maxsqlcount" value="${application.jdbc.maxsqlcount}" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="commonJdbcUtils" class="com.wb.jdbcutils.CommonJdbcUtils">
+		<constructor-arg>
+			<ref bean="commonJdbcCore" />
+		</constructor-arg>
+	</bean>
+<!-- 新增jdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref ="dataSource"></property>
+	</bean>
+<!-- dao注入 -->
+	<bean id="commonSerice" class="com.wonders.common.service.impl.CommonServiceImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+	
+</beans> 
