@@ -14,91 +14,8 @@
         http://www.springframework.org/schema/tx
         http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
-	<!-- 启用Spring注释 -->
-	<context:annotation-config />
-
-	<!-- 使Spring支持自动检测组件，如注解的Controller -->
-	<context:component-scan base-package="com.wonders" />
-
-	<!--启动spring mvc的注解功能,设置编码方式，防止乱码 -->
-	<bean id="handlerMapping"
-		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-	</bean>
-	<bean id="handlerAdapter"
-		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<bean
-					class="org.springframework.http.converter.StringHttpMessageConverter">
-					<property name="supportedMediaTypes">
-						<list>
-							<value>text/html;charset=UTF-8</value>
-						</list>
-					</property>
-				</bean>
-			</list>
-		</property>
-	</bean>
-	<!--srping mvc 拦截器 -->
-	<!-- <mvc:interceptors>
-		 登录拦截器
-		 <mvc:interceptor>
-			 如果不配置或/**,将拦截所有的Controller,/*表示拦截第一层
-			<mvc:mapping path="/company/*"/>
-			不需要拦截的路径
-			<mvc:exclude-mapping path="/login/*" />
-			<mvc:exclude-mapping path="/menu/*" />
-			<mvc:exclude-mapping path="/register/**" />
-			<mvc:exclude-mapping path="/login/index.html" />
-			<bean class="com.wonders.login.interceptor.LoginInterceptor"></bean> 
-		</mvc:interceptor>
-		个人用户拦截
-		
-	</mvc:interceptors> -->
-
-	<!-- 属性配置接入 -->
-	<bean id="propertyConfigurer"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath:database.properties</value>
-				<value>classpath:application.properties</value>
-			</list>
-		</property>
-	</bean>
-
-	<!-- 引入应用上下文配置 -->
-	<!-- <import resource="classpath:/applicationContext.xml" /> -->
-	<!-- 1. 配置事务管理器,管理JDBC的 -->
-	<!-- <bean id="transactionManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean> -->
-	<!-- 配置事务异常封装 -->
-	<bean id="persistenceExceptionTranslationPostProcessor"
-		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
-
-	<!-- 声明式容器事务管理 ,transaction-manager指定事务管理器为transactionManager -->
-	<!-- <tx:advice id="txAdvice" transaction-manager="transactionManager">
-		<tx:attributes>
-			<tx:method name="add*" propagation="REQUIRED" />
-			<tx:method name="get*" propagation="REQUIRED" />
-			<tx:method name="save*" propagation="REQUIRED" />
-			<tx:method name="delete*" propagation="REQUIRED" />
-			<tx:method name="update*" propagation="REQUIRED" />
-			<tx:method name="*" read-only="true" />
-		</tx:attributes>
-	</tx:advice> -->
-
-	<!-- <aop:config expose-proxy="true">
-		只对业务逻辑层实施事务
-		<aop:pointcut id="txPointcut" expression="execution (* com.wonders..*.* (..))" />
-		Advisor定义，切入点和通知分别为txPointcut、txAdvice
-		<aop:advisor pointcut-ref="txPointcut" advice-ref="txAdvice" />
-	</aop:config> -->
-
-	<bean
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<!-- 视图层配置 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
 			<value>/pages/</value>
 		</property>
@@ -108,9 +25,14 @@
 	</bean>
 	
 	<!-- 配置静态资源访问 -->
-	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:resources location="/resources/" mapping="/resources/**" />
 
 	<!-- 启用注解驱动 -->
+	<!-- 激活基于注解的配置 @RequestMapping, @ExceptionHandler,数据绑定 ,@NumberFormat ,
+    @DateTimeFormat ,@Controller ,@Valid ,@RequestBody ,@ResponseBody等  -->
 	<mvc:annotation-driven />
+	
+	<!-- 配置根视图 -->
+    <mvc:view-controller path="/" view-name="index"/>
 
 </beans>

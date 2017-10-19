@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans xmlns="http://www.springframework.org/schema/beans"        
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"        
+	xmlns:aop="http://www.springframework.org/schema/aop"        
+	xmlns:tx="http://www.springframework.org/schema/tx"        
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd             
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd             
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd"> 
+            
+	<bean id="exceptionResolver" class="com.wb.exceptions.CustomExceptionResolver">
+     	<property name="defaultErrorView" value="/pages/common/error/error_common" />
+		<property name="exceptionMappings">
+		 <props>
+			<prop key="java.lang.Exception">/pages/common/error/error_common</prop>
+			<prop key="java.lang.RuntimeException">/pages/common/error/error_common</prop>
+		 </props>
+		</property>
+    </bean> 
+   
+</beans>

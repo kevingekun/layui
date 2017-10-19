@@ -1,23 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" 
-"http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd"><!-- 启用Spring注释 -->
+	<context:annotation-config />
 
-	<!-- dbcp连接池配置 -->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
-		destroy-method="close">
+	<!-- 使Spring支持自动检测组件，如注解的Controller -->
+	<context:component-scan base-package="com.bcity" />
+
+	<!--启动spring mvc的注解功能,设置编码方式，防止乱码 -->
+	<bean id="handlerMapping"
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+	</bean>
+	<bean id="handlerAdapter"
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<!--srping mvc 拦截器 -->
+	<!-- <mvc:interceptors> 登录拦截器 <mvc:interceptor> 如果不配置或/**,将拦截所有的Controller,/*表示拦截第一层 
+		<mvc:mapping path="/company/*"/> 不需要拦截的路径 <mvc:exclude-mapping path="/login/*" 
+		/> <mvc:exclude-mapping path="/menu/*" /> <mvc:exclude-mapping path="/register/**" 
+		/> <mvc:exclude-mapping path="/login/index.html" /> <bean class="com.wonders.login.interceptor.LoginInterceptor"></bean> 
+		</mvc:interceptor> 个人用户拦截 </mvc:interceptors> -->
+	<!-- 属性配置接入 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:database.properties</value>
+				<value>classpath:application.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- jdbc连接池配置 -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="${jdbc.connection.driver_class}" />
 		<property name="url" value="${jdbc.connection.url}" />
 		<property name="username" value="${jdbc.connection.username}" />
 		<property name="password" value="${jdbc.connection.password}" />
-		<property name="initialSize" value="${jdbc.connection.initialSize}" />
-		<property name="maxActive" value="${jdbc.connection.maxActive}" />
-		<property name="maxIdle" value="${jdbc.connection.maxIdle}" />
-		<property name="maxWait" value="${jdbc.connection.maxWait}" />
-		<property name="removeAbandoned" value="${jdbc.connection.removeAbandoned}" />
-		<property name="removeAbandonedTimeout" value="${jdbc.connection.removeAbandonedTimeout}" />
-		<property name="logAbandoned" value="${jdbc.connection.logAbandoned}" />
 	</bean>
+
+	<!-- 配置事务管理器,管理JDBC的 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 配置事务异常封装 -->
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<!-- 声明式容器事务管理 ,transaction-manager指定事务管理器为transactionManager -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="get*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config expose-proxy="true">
+		<!-- 只对业务逻辑层实施事务 -->
+		<aop:pointcut id="txPointcut" expression="execution (* com.wonders..*.* (..))" />
+		<!-- Advisor定义，切入点和通知分别为txPointcut、txAdvice -->
+		<aop:advisor pointcut-ref="txPointcut" advice-ref="txAdvice" />
+	</aop:config>
 
 	<!-- jndi连接池配置 -->
 	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
@@ -36,13 +110,59 @@
 			<ref bean="commonJdbcCore" />
 		</constructor-arg>
 	</bean>
-<!-- 新增jdbcTemplate -->
+
+	<!-- jdbcTemplate -->
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-		<property name="dataSource" ref ="dataSource"></property>
+		<property name="dataSource" ref="dataSource"></property>
 	</bean>
-<!-- dao注入 -->
-	<bean id="commonSerice" class="com.wonders.common.service.impl.CommonServiceImpl">
-		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+
+	<!-- 继承自AuthorizingRealm的自定义Realm,即指定Shiro验证用户登录的类为自定义的Realm.java -->
+	<bean id="myRealm" class="com.bcity.others.shiro.Realm" />
+
+	<!-- Shiro默认会使用Servlet容器的Session,可通过sessionMode属性来指定使用Shiro原生Session -->
+	<!-- 即<property name="sessionMode" value="native"/>,详细说明见官方文档 -->
+	<!-- 这里主要是设置自定义的单Realm应用,若有多个Realm,可使用'realms'属性代替 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myRealm" />
 	</bean>
-	
+
+	<!-- Shiro过滤器 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- Shiro的核心安全接口,这个属性是必须的 -->
+		<property name="securityManager" ref="securityManager" />
+		<!-- 要求登录时的链接(可根据项目的URL进行替换),非必须的属性,默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
+		<!-- 身份认证失败，则跳转到该登录页面 -->
+		<property name="loginUrl" value="/pages/login.jsp" />
+		<!-- 用户访问未对其授权的资源时,所显示的连接 -->
+		<property name="unauthorizedUrl" value="/pages/unauthorized.jsp" />
+		<!-- Shiro连接约束配置,即过滤链的定义 -->
+		<property name="filterChainDefinitions">
+			<value>
+				/login=anon
+				/user/admin*=authc
+				/user/student*/**=roles[teacher]
+				/user/teacher*/**=perms["user:create"]
+				/common/**=authc,roles[teacher]
+				/pages/common/**=authc,perms[common]
+			</value>
+		</property>
+	</bean>
+
+	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+	<!-- 开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 -->
+	<!-- 配置以下两个bean即可实现此功能 -->
+	<!-- Enable Shiro Annotations for Spring-configured beans. Only run after 
+		the lifecycleBeanProcessor has run -->
+	<!-- 由于本例中并未使用Shiro注解,故注释掉这两个bean(个人觉得将权限通过注解的方式硬编码在程序中,查看起来不是很方便,没必要使用) -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor" />
+	<bean
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+
+
 </beans> 

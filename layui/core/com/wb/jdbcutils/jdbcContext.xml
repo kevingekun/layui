@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans xmlns="http://www.springframework.org/schema/beans"        
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"               
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">       
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"> 
+         <property name="dataSource" ref="dataSource"/> 
+    </bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="commonJdbcCore" class="com.wb.jdbcutils.CommonJdbcCore">
+		<property name="devMode" value="${application.jdbc.devMode}" />
+		<property name="showSql" value="${application.jdbc.showSql}" />
+		<property name="maxsqltime" value="${application.jdbc.maxsqltime}" />
+		<property name="maxsqlcount" value="${application.jdbc.maxsqlcount}" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="commonJdbcUtils" class="com.wb.jdbcutils.CommonJdbcUtils">
+		<constructor-arg>
+			<ref bean="commonJdbcCore"/>
+		</constructor-arg>
+	</bean>
+	
+</beans>
