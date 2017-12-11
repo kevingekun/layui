@@ -13,11 +13,14 @@
         http://www.springframework.org/schema/aop
         http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
         http://www.springframework.org/schema/tx
-        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd"><!-- 启用Spring注释 -->
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+        
+    <!-- 启用Spring注释 -->
 	<context:annotation-config />
 
 	<!-- 使Spring支持自动检测组件，如注解的Controller -->
 	<context:component-scan base-package="com.bcity" />
+	
 
 	<!--启动spring mvc的注解功能,设置编码方式，防止乱码 -->
 	<bean id="handlerMapping"
@@ -38,12 +41,7 @@
 			</list>
 		</property>
 	</bean>
-	<!--srping mvc 拦截器 -->
-	<!-- <mvc:interceptors> 登录拦截器 <mvc:interceptor> 如果不配置或/**,将拦截所有的Controller,/*表示拦截第一层 
-		<mvc:mapping path="/company/*"/> 不需要拦截的路径 <mvc:exclude-mapping path="/login/*" 
-		/> <mvc:exclude-mapping path="/menu/*" /> <mvc:exclude-mapping path="/register/**" 
-		/> <mvc:exclude-mapping path="/login/index.html" /> <bean class="com.wonders.login.interceptor.LoginInterceptor"></bean> 
-		</mvc:interceptor> 个人用户拦截 </mvc:interceptors> -->
+	
 	<!-- 属性配置接入 -->
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -97,7 +95,7 @@
 	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
 		<description>JNDI 数据源配置</description> <property name="jndiName" value="JDZX"/> 
 		</bean> -->
-	<!-- spring 声明式事务配置 -->
+		
 	<bean id="commonJdbcCore" class="com.wb.jdbcutils.CommonJdbcCore">
 		<property name="devMode" value="${application.jdbc.devMode}" />
 		<property name="showSql" value="${application.jdbc.showSql}" />
@@ -116,53 +114,6 @@
 		<property name="dataSource" ref="dataSource"></property>
 	</bean>
 
-	<!-- 继承自AuthorizingRealm的自定义Realm,即指定Shiro验证用户登录的类为自定义的Realm.java -->
-	<bean id="myRealm" class="com.bcity.others.shiro.Realm" />
-
-	<!-- Shiro默认会使用Servlet容器的Session,可通过sessionMode属性来指定使用Shiro原生Session -->
-	<!-- 即<property name="sessionMode" value="native"/>,详细说明见官方文档 -->
-	<!-- 这里主要是设置自定义的单Realm应用,若有多个Realm,可使用'realms'属性代替 -->
-	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
-		<property name="realm" ref="myRealm" />
-	</bean>
-
-	<!-- Shiro过滤器 -->
-	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
-		<!-- Shiro的核心安全接口,这个属性是必须的 -->
-		<property name="securityManager" ref="securityManager" />
-		<!-- 要求登录时的链接(可根据项目的URL进行替换),非必须的属性,默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
-		<!-- 身份认证失败，则跳转到该登录页面 -->
-		<property name="loginUrl" value="/pages/login.jsp" />
-		<!-- 用户访问未对其授权的资源时,所显示的连接 -->
-		<property name="unauthorizedUrl" value="/pages/unauthorized.jsp" />
-		<!-- Shiro连接约束配置,即过滤链的定义 -->
-		<property name="filterChainDefinitions">
-			<value>
-				/login=anon
-				/user/admin*=authc
-				/user/student*/**=roles[teacher]
-				/user/teacher*/**=perms["user:create"]
-				/common/**=authc,roles[teacher]
-				/pages/common/**=authc,perms[common]
-			</value>
-		</property>
-	</bean>
-
-	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
-	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
-
-	<!-- 开启Shiro的注解(如@RequiresRoles,@RequiresPermissions),需借助SpringAOP扫描使用Shiro注解的类,并在必要时进行安全逻辑验证 -->
-	<!-- 配置以下两个bean即可实现此功能 -->
-	<!-- Enable Shiro Annotations for Spring-configured beans. Only run after 
-		the lifecycleBeanProcessor has run -->
-	<!-- 由于本例中并未使用Shiro注解,故注释掉这两个bean(个人觉得将权限通过注解的方式硬编码在程序中,查看起来不是很方便,没必要使用) -->
-	<bean
-		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
-		depends-on="lifecycleBeanPostProcessor" />
-	<bean
-		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
-		<property name="securityManager" ref="securityManager" />
-	</bean>
-
-
+	<!-- 导入shiro的相关配置 -->
+	<import resource="classpath:spring/spring-shiro.xml" />
 </beans> 

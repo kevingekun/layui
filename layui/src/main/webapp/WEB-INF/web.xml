@@ -1,25 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app>
 	<display-name>Archetype Created Web Application</display-name>
-	<!-- 配置Shiro过滤器,先让Shiro过滤系统接收到的请求 -->
-	<!-- 这里filter-name必须对应applicationContext.xml中定义的<bean id="shiroFilter"/> -->
-	<!-- 使用[/*]匹配所有请求,保证所有的可控请求都经过Shiro的过滤 -->
-	<!-- 通常会将此filter-mapping放置到最前面(即其他filter-mapping前面),以保证它是过滤器链中第一个起作用的 -->
-	<filter>
-		<filter-name>shiroFilter</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy
-		</filter-class>
-		<init-param>
-			<!-- 该值缺省为false,表示生命周期由SpringApplicationContext管理,设置为true则表示由ServletContainer管理 -->
-			<param-name>targetFilterLifecycle</param-name>
-			<param-value>true</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>shiroFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	<!-- 统一编码 -->
+	
+	<!-- spring核心位置 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring/spring-core.xml</param-value>
+	</context-param>
+	
+	<!-- 统一编码filter -->
 	<filter>
 		<filter-name>CharacterEncodingFilter</filter-name>
 		<filter-class>org.springframework.web.filter.CharacterEncodingFilter
@@ -33,34 +22,58 @@
 			<param-value>true</param-value>
 		</init-param>
 	</filter>
+	
+	<!-- 配置Shiro过滤器,先让Shiro过滤系统接收到的请求 -->
+	<!-- 这里filter-name必须对应spring-shiro.xml中定义的<bean id="shiroFilter"/> -->
+	<!-- 使用[/*]匹配所有请求,保证所有的可控请求都经过Shiro的过滤 -->
+	<filter>
+		<filter-name>shiroFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy
+		</filter-class>
+		<init-param>
+			<!-- 该值缺省为false,表示生命周期由SpringApplicationContext管理,设置为true则表示由ServletContainer管理 -->
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	
+	<!-- 统一编码的filter-mapping-->
 	<filter-mapping>
 		<filter-name>CharacterEncodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-
-	<!-- spring监听器 -->
+	
+	<!-- shiro的filter-mapping-->
+	<filter-mapping>
+		<filter-name>shiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	 <!--  此监听器出用于主要为了解决java.beans.Introspector导致内存泄漏的问题. This listener should
+          be registered as the first one in web.xml, before any application listeners
+          such as Spring's ContextLoaderListener. -->
+    <listener>
+        <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+    </listener>
+	
+	<!-- 加载spring核心的listener-->
 	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener
-		</listener-class>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:applicationContext.xml</param-value>
-	</context-param>
 
 	<!-- 添加springmvc支持 -->
 	<servlet>
-		<servlet-name>spring-web</servlet-name>
+		<servlet-name>spring-mvc</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet
 		</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring-web-servlet.xml</param-value>
+			<param-value>classpath:spring/spring-mvc.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>spring-web</servlet-name>
+		<servlet-name>spring-mvc</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 

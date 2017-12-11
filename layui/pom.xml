@@ -68,12 +68,6 @@
 			<version>1.2.3</version>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>${jstl.version}</version>
-		</dependency>
-
 		<!-- Log4j -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -102,7 +96,7 @@
 		<!-- 本地仓库添加的包 -->
 		<!-- <dependency> <groupId>com.oracle</groupId> <artifactId>ojdbc6</artifactId> 
 			<version>10.2.0.4.0</version> </dependency> -->
-			
+
 		<!-- 验证码 -->
 		<!-- https://mvnrepository.com/artifact/com.github.bingoohuang/patchca -->
 		<dependency>
@@ -133,8 +127,20 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.0.5</version>
 		</dependency>
-
-
+		
+		<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+		<dependency>
+		    <groupId>commons-fileupload</groupId>
+		    <artifactId>commons-fileupload</artifactId>
+		    <version>1.3.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/javax.servlet/jstl -->
+		<dependency>
+		    <groupId>javax.servlet</groupId>
+		    <artifactId>jstl</artifactId>
+		    <version>1.2</version>
+		</dependency>
+		
 
 
 	</dependencies>
