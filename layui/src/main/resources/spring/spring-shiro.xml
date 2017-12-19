@@ -31,24 +31,35 @@
 		<property name="securityManager" ref="securityManager" />
 		<!-- 要求登录时的链接(可根据项目的URL进行替换),非必须的属性,默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
 		<!-- 身份认证失败，则跳转到该登录页面 -->
-		<property name="loginUrl" value="/pages/login.jsp" />
+		<!-- <property name="loginUrl" value="/pages/login.jsp" /> -->
+		<property name="loginUrl" value="/views/login.jsp" />
 		<!-- 用户访问未对其授权的资源时,所显示的连接 -->
 		<property name="unauthorizedUrl" value="/pages/unauthorized.jsp" />
-		<!-- Shiro连接约束配置,即过滤链的定义 -->
-		<property name="filterChainDefinitions">
+		<!-- Shiro连接约束配置,即过滤链的定义,通过此种方式配置，上面 loginUrl 会起作用，如果用注解方式，则需要在 spring-core.xml 中捕获处理异常 -->
+		<!-- <property name="filterChainDefinitions">
 			<value>
-				/admin/**=authc
-				<!-- /user/admin*=authc
+				/admin/**=roles[admin]
+				/user/admin*=authc
 				/user/student*/**=roles[teacher]
 				/user/teacher*/**=perms["user:create"]
 				/common/**=authc,roles[teacher]
-				/pages/common/**=authc,perms[common] -->
+				/pages/common/**=authc,perms[common]
 			</value>
-		</property>
+		</property> -->
 	</bean>
 
 	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
 	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	
+	<!-- 开启shiro注解-->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor">
+        <property name="proxyTargetClass" value="true" />
+    </bean>
+
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
 	
 	<!-- 数据库保存的密码是使用MD5算法加密的，所以这里需要配置一个密码匹配对象 -->
     <!-- <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.Md5CredentialsMatcher"></bean> -->

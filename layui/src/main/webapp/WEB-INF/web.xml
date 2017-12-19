@@ -2,6 +2,13 @@
 <web-app>
 	<display-name>Archetype Created Web Application</display-name>
 	
+	<!-- 加载顺序与元素节点在文件中的配置顺序无关20171218 -->
+	
+	<!-- 加载spring核心的listener-->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
 	<!-- spring核心位置 -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -56,16 +63,12 @@
         <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
     </listener>
 	
-	<!-- 加载spring核心的listener-->
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
+	
 
 	<!-- 添加springmvc支持 -->
 	<servlet>
 		<servlet-name>spring-mvc</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet
-		</servlet-class>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>classpath:spring/spring-mvc.xml</param-value>
@@ -87,14 +90,34 @@
 		<param-name>log4jRefreshInterval</param-name>
 		<param-value>100000</param-value>
 	</context-param>
-	<!-- 1. 动态的改变记录级别和策略，不需要重启Web应用; 2. 把log文件定在 /WEB-INF/logs/ 而不需要写绝对路径。 -->
 	<listener>
-		<listener-class>org.springframework.web.util.Log4jConfigListener
-		</listener-class>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
 	</listener>
 
 
 
-	<!-- <jsp-config> <taglib> <taglib-uri>elile.tld</taglib-uri> <taglib-location>/WEB-INF/tld/elile.tld</taglib-location> 
-		</taglib> </jsp-config> -->
+	<jsp-config>
+		<taglib>
+			<taglib-uri>elile.tld</taglib-uri>
+			<taglib-location>/WEB-INF/tld/elile.tld</taglib-location>
+		</taglib>
+		<jsp-property-group>
+	        <description>Special property group for JSP Configuration JSP example.</description>
+	        <display-name>JSPConfiguration</display-name>
+	        <!-- 设定值所影响的范围，如： /CH2 或 /*.jsp -->
+	        <url-pattern>*.jsp </url-pattern>
+	        <!-- 若为 true，表示不支持 EL 语法 -->
+	        <el-ignored>false</el-ignored>
+	        <!-- 设定 JSP 网页的编码 -->
+	        <page-encoding>UTF-8</page-encoding>
+	        <!-- 若为 true，表示不支持 <% scripting %>语法 -->
+	        <scripting-invalid>false</scripting-invalid>
+	        
+	        <!-- 设置 JSP 网页的抬头，扩展名为 .jspf -->
+	        <!-- It is equivalent to using a static include directive such as <%@ include file="include.jsp" %> at the top and bottom of the JSP and can be used to set various JSP variables. -->
+	        <!-- <include-prelude>/include/prelude.jspf</include-prelude> -->
+	        <!-- 设置 JSP 网页的结尾，扩展名为 .jspf -->
+	        <!-- <include-coda>/include/coda.jspf</include-coda> -->
+	    </jsp-property-group>
+	</jsp-config>
 </web-app>

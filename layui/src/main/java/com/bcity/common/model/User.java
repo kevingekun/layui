@@ -14,7 +14,6 @@ public class User {
 	private String nickname;
 	private String phone;
 	private String email;
-	private long role_id;
 	private long city_id;
 	private Date register_date;
 	private long login_count;
@@ -72,15 +71,6 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	@Column(name = "role_id")
-	public long getRole_id() {
-		return role_id;
-	}
-
-	public void setRole_id(long role_id) {
-		this.role_id = role_id;
 	}
 
 	@Column(name = "city_id")

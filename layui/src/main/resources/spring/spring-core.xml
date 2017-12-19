@@ -19,13 +19,24 @@
 	<context:annotation-config />
 
 	<!-- 使Spring支持自动检测组件，如注解的Controller -->
-	<context:component-scan base-package="com.bcity" />
+	<context:component-scan base-package="com.bcity" />  
+         
 	
 
 	<!--启动spring mvc的注解功能,设置编码方式，防止乱码 -->
 	<bean id="handlerMapping"
 		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
 	</bean>
+	
+	<!-- 用于处理 shiro 使用注解方式捕获处理异常 -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.apache.shiro.authz.UnauthenticatedException">redirect:/login/login</prop>
+			</props>
+		</property>
+	</bean>
+	
 	<bean id="handlerAdapter"
 		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<property name="messageConverters">
